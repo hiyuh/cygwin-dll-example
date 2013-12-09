@@ -17,9 +17,22 @@ cygIncThenInc.dll: Inc.dll IncThenInc.o
 		-Wl,--whole-archive IncThenInc.o \
 		-Wl,--no-whole-archive -L. -lInc
 
-main.exe: main.c cygIncThenInc.dll
-	gcc -o main.exe main.c -L. -lIncThenInc
+main.o: main.c
+	gcc -c -o main.o main.c
+
+main.exe: main.o cygIncThenInc.dll
+	gcc -o main.exe main.o -L. -lIncThenInc
 
 test: main.exe
 	./main.exe
 
+.PHONY: clean
+
+clean:
+	rm -f Inc.o
+	rm -f Inc.dll
+	rm -f IncThenInc.o
+	rm -f cygIncThenInc.dll
+	rm -f libIncThenInc.dll.a
+	rm -f main.o
+	rm -f main.exe
