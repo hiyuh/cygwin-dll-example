@@ -1,0 +1,5 @@
+*.o
+*.dll
+lib*.dll.a
+cyg*.dll
+*.exe
