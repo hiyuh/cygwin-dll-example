@@ -8,17 +8,10 @@ main.o: main.c Inc.h
 	gcc -c -o main.o -I. main.c
 
 main.exe: main.o libInc.a
-	gcc -o main.exe main.o -L. -lInc
-
-Inc.def: main.exe
-	echo "EXPORTS" > Inc.def
-	nm main.exe | grep -e ' T _' | sed -e 's/.* T _//' >> Inc.def
+	gcc -o main.exe main.o -L. -lInc -Wl,--export-all-symbols -Wl,--out-implib=libmain.a
 
 IncThenInc.o: IncThenInc.c Inc.h
 	gcc -c -o IncThenInc.o -I. IncThenInc.c
-
-libInc-import.a: main.exe Inc.def
-	dlltool -d Inc.def -D main.exe -l libInc-import.a
 
 cygIncThenInc.$(SO_EXT): IncThenInc.o libInc.a
 	gcc -shared -o cygIncThenInc.$(SO_EXT) \
@@ -28,25 +21,25 @@ cygIncThenInc.$(SO_EXT): IncThenInc.o libInc.a
 		-Wl,--whole-archive IncThenInc.o \
 		-Wl,--no-whole-archive -L. -lInc
 
-cygIncThenInc-import.$(SO_EXT): IncThenInc.o libInc-import.a
+cygIncThenInc-import.$(SO_EXT): IncThenInc.o main.exe
 	gcc -shared -o cygIncThenInc-import.$(SO_EXT) \
 		-Wl,--out-implib=libIncThenInc-import.$(SO_EXT).a \
 		-Wl,--export-all-symbols \
 		-Wl,--enable-auto-import \
 		-Wl,--whole-archive IncThenInc.o \
-		-Wl,--no-whole-archive -L. -lInc-import
+		-Wl,--no-whole-archive -L. -lmain
 
 libIncThenInc.$(SO_EXT): IncThenInc.o libInc.a
 	gcc -shared -o libIncThenInc.$(SO_EXT) IncThenInc.o -L. -lInc
 
-libIncThenInc-import.$(SO_EXT): IncThenInc.o libInc-import.a
-	gcc -shared -o libIncThenInc-import.$(SO_EXT) IncThenInc.o -L. -lInc-import
+libIncThenInc-import.$(SO_EXT): IncThenInc.o libmain.a main.exe
+	gcc -shared -o libIncThenInc-import.$(SO_EXT) IncThenInc.o -L. -lmain
 
 IncThenInc.$(SO_EXT): IncThenInc.o libInc.a
 	gcc -shared -o IncThenInc.$(SO_EXT) IncThenInc.o -L. -lInc
 
-IncThenInc-import.$(SO_EXT): IncThenInc.o libInc-import.a
-	gcc -shared -o IncThenInc-import.$(SO_EXT) IncThenInc.o -L. -lInc-import
+IncThenInc-import.$(SO_EXT): IncThenInc.o libmain.a main.exe
+	gcc -shared -o IncThenInc-import.$(SO_EXT) IncThenInc.o -L. -lmain
 
 test:                              \
 	main.exe                       \
@@ -76,9 +69,8 @@ clean:
 	rm -f libInc.a
 	rm -f main.o
 	rm -f main.exe
-	rm -f Inc.def
+	rm -f libmain.a
 	rm -f IncThenInc.o
-	rm -f libInc-import.a
 	rm -f cygIncThenInc.$(SO_EXT)
 	rm -f libIncThenInc.$(SO_EXT).a
 	rm -f cygIncThenInc-import.$(SO_EXT)
