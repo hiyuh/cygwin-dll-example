@@ -1,5 +1,3 @@
-SO_EXT=so
-
 all: test
 
 Inc.o: Inc.c
@@ -19,11 +17,11 @@ libmain.a: main.exe
 IncThenInc.o: IncThenInc.c Inc.h
 	gcc -c -o IncThenInc.o -I. IncThenInc.c
 
-IncThenInc.$(SO_EXT): IncThenInc.o libmain.a libmain.a
-	gcc -shared -o IncThenInc.$(SO_EXT) IncThenInc.o -L. -lmain
+IncThenInc.so: IncThenInc.o libmain.a libmain.a
+	gcc -shared -o IncThenInc.so IncThenInc.o -L. -lmain
 
-test: main.exe IncThenInc.$(SO_EXT)
-	LD_LIBRARY_PATH=. ./main.exe IncThenInc.$(SO_EXT)
+test: main.exe IncThenInc.so
+	LD_LIBRARY_PATH=. ./main.exe IncThenInc.so
 
 .PHONY: clean
 
@@ -34,4 +32,4 @@ clean:
 	rm -f main.exe
 	rm -f libmain.a
 	rm -f IncThenInc.o
-	rm -f IncThenInc.$(SO_EXT)
+	rm -f IncThenInc.so
