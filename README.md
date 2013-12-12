@@ -8,7 +8,7 @@ result:
  * use real path to above shared object for dlopen().
 
 ```
-$ make test
+$ make
 gcc -c -o main.o -I. main.c
 gcc -c -o Inc.o Inc.c
 ar rv libInc.a Inc.o
